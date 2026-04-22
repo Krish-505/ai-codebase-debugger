@@ -15,16 +15,21 @@ class OllamaLLM:
         self.timeout = timeout
 
     def generate(self, prompt: str, model: str = "llama3", temperature: float = 0.1) -> str:
-        response = requests.post(
-            f"{self.base_url}/api/generate",
-            json={
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {"temperature": temperature},
-            },
-            timeout=self.timeout,
-        )
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/generate",
+                json={
+                    "model": model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": temperature},
+                },
+                timeout=self.timeout,
+            )
+        except requests.Timeout as exc:
+            raise LLMError(f"Ollama generation timed out after {self.timeout} seconds.") from exc
+        except requests.RequestException as exc:
+            raise LLMError(f"Could not connect to Ollama at {self.base_url}: {exc}") from exc
         if response.status_code >= 400:
             raise LLMError(f"Ollama generation request failed: {response.text}")
         payload = response.json()

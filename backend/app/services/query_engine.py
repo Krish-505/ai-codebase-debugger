@@ -13,7 +13,7 @@ class QueryEngine:
     def answer(self, project_id: str, question: str, top_k: int) -> QueryResponse:
         chunks = self.retriever.retrieve(project_id, question, top_k)
         prompt = self._build_prompt(question, chunks)
-        answer = self.llm.generate(prompt, model="codellama", temperature=0.1)
+        answer = self.llm.generate(prompt, model="llama3", temperature=0.1)
         return QueryResponse(answer=answer, sources=chunks)
 
     def _build_prompt(self, question: str, chunks: list[RetrievedChunk]) -> str:
